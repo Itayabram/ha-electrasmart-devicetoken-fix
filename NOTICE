@@ -1,0 +1,25 @@
+This repository is a derivative work.
+
+`custom_components/electrasmart/` is a modified copy of the `electrasmart`
+integration from Home Assistant Core:
+
+    https://github.com/home-assistant/core/tree/2026.9.4/homeassistant/components/electrasmart
+
+Home Assistant Core is Copyright its contributors and licensed under the
+Apache License, Version 2.0 (see LICENSE in this repository).
+
+Files `climate.py`, `config_flow.py`, and `const.py` are unmodified copies
+of the originals. `manifest.json` has unchanged `requirements`/`domain`
+fields, with only `name` and the required `version` key added (custom
+integrations must declare a version).
+
+`__init__.py` is a modified file: it adds one monkey-patch (and the logging
+needed for it) to `ElectraAirConditioner.__init__` so a device missing the
+`deviceToken` field in Electra's API response no longer crashes the whole
+integration. The change is documented in a module docstring at the top of
+the file, per the Apache License's requirement that modified files carry a
+notice of the change. Everything else in the file is unchanged from the
+original.
+
+Original integration codeowner: @jafar-atili
+(https://github.com/jafar-atili)

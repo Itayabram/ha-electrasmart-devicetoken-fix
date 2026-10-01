@@ -1,5 +1,7 @@
 # תיקון ל-Electra Smart Integration — שגיאת `KeyError: 'deviceToken'`
 
+> **זהו fork / derivative work** של אינטגרציית `electrasmart` מ-[home-assistant/core](https://github.com/home-assistant/core/tree/2026.9.4/homeassistant/components/electrasmart) (גרסה 2026.9.4), מופץ תחת אותו רישיון — **Apache License 2.0** (ראו [LICENSE](LICENSE) ו-[NOTICE](NOTICE)). רוב הקבצים הם עותק **ללא שינוי** של המקור; רק `__init__.py` שונה, והשינוי מתועד בראש הקובץ עצמו כנדרש ברישיון.
+
 ## הבעיה
 
 החל מסוף ספטמבר 2026, משתמשים רבים של אינטגרציית **Electra Smart** ב-Home Assistant מדווחים שכל המזגנים נעלמים (`unavailable`) ולא נטענים מחדש, עם השגיאה הבאה בלוג:
@@ -44,6 +46,8 @@ File ".../electrasmart/device/__init__.py", line 20, in __init__
   ואז restart נוסף.
 - מומלץ לעקוב אחרי ה-issues למעלה ולהסיר את התיקון הזה כשהם ייסגרו.
 
-## קרדיט
+## קרדיט ורישוי
 
-התיקון המקורי ב-`__init__.py` הוא שלי (Itay); כל שאר הקוד הוא עותק ללא שינוי של האינטגרציה הרשמית, codeowners: [@jafar-atili](https://github.com/jafar-atili).
+- **הקוד המקורי** (כל הקבצים חוץ מהשינוי הממוקד ב-`__init__.py`): Home Assistant Core, [home-assistant/core](https://github.com/home-assistant/core), codeowner של האינטגרציה: [@jafar-atili](https://github.com/jafar-atili). רישיון: Apache License 2.0.
+- **השינוי בקובץ `__init__.py`**: Itay Abramzon, 2026, תחת אותו רישיון (Apache 2.0) — ראו [NOTICE](NOTICE) לפירוט המדויק של מה השתנה.
+- זהו עדיין **fork לא רשמי**, לא קשור ולא מאושר על ידי Home Assistant או Electra.
