@@ -1,10 +1,10 @@
-# תיקון ל-Electra Smart Integration — שגיאת `KeyError: 'deviceToken'`
+# Electra Smart Integration Fix — `KeyError: 'deviceToken'`
 
-> **זהו fork / derivative work** של אינטגרציית `electrasmart` מ-[home-assistant/core](https://github.com/home-assistant/core/tree/2026.9.4/homeassistant/components/electrasmart) (גרסה 2026.9.4), מופץ תחת אותו רישיון — **Apache License 2.0** (ראו [LICENSE](LICENSE) ו-[NOTICE](NOTICE)). רוב הקבצים הם עותק **ללא שינוי** של המקור; רק `__init__.py` שונה, והשינוי מתועד בראש הקובץ עצמו כנדרש ברישיון.
+> **This is a fork / derivative work** of the `electrasmart` integration from [home-assistant/core](https://github.com/home-assistant/core/tree/2026.9.4/homeassistant/components/electrasmart) (version 2026.9.4), distributed under the same license — **Apache License 2.0** (see [LICENSE](LICENSE) and [NOTICE](NOTICE)). Most files are an **unmodified** copy of the original; only `__init__.py` was changed, and the change is documented at the top of that file as required by the license.
 
-## הבעיה
+## The problem
 
-החל מסוף ספטמבר 2026, משתמשים רבים של אינטגרציית **Electra Smart** ב-Home Assistant מדווחים שכל המזגנים נעלמים (`unavailable`) ולא נטענים מחדש, עם השגיאה הבאה בלוג:
+Since late September 2026, many users of the **Electra Smart** integration in Home Assistant have reported that all their AC units become `unavailable` and fail to reload, with the following error in the log:
 
 ```
 KeyError: 'deviceToken'
@@ -12,42 +12,44 @@ File ".../electrasmart/device/__init__.py", line 20, in __init__
     self.token: str = data["deviceToken"]
 ```
 
-**הסיבה:** ה-API הציבורי של אלקטרה (`GET_DEVICES`) הפסיק להחזיר שדה `deviceToken` עבור חלק מהמכשירים. ספריית `pyElectra` שה-integration משתמשת בה לא מתמודדת עם זה בחן ומתרסקת — וקריסה אחת כזו מפילה את **כל** החשבון (כל המזגנים, לא רק את הבעייתי).
+**Root cause:** Electra's public API (`GET_DEVICES`) stopped returning a `deviceToken` field for some devices. The `pyElectra` library the integration depends on doesn't handle this gracefully and crashes — and that single crash takes down the **entire** account (all AC units, not just the affected one).
 
-דווח גם בקהילה הישראלית ([פוסט פייסבוק](https://www.facebook.com/groups/homeassistant.co.il)) ובגיטהאב הרשמי:
+Also reported in the Israeli community ([Facebook post](https://www.facebook.com/groups/homeassistant.co.il)) and on the official GitHub:
 - https://github.com/home-assistant/core/issues/183846
 - https://github.com/home-assistant/core/issues/183829
 
-## הפתרון
+**Status (as of 2026-10-05):** An official fix is in progress but **not yet merged** — [home-assistant/core PR #184187](https://github.com/home-assistant/core/pull/184187) switches the integration to a maintained fork of the client library. Until that PR is merged and released, the custom integration below is the only working fix.
 
-זהו עותק מקומי (`custom_components`) של האינטגרציה הרשמית, זהה לחלוטין לקוד המקור (גרסת Home Assistant 2026.9.4) — **מלבד שינוי אחד ממוקד**: ב-`__init__.py` יש monkey-patch שהופך את `deviceToken` לשדה אופציונלי במקום לקרוס. אם מכשיר חסר טוקן, הוא נרשם עם אזהרה בלוג וממשיך לפעול (קריאת סטטוס ובדרך כלל גם שליחת פקודות ימשיכו לעבוד); שאר המכשירים בחשבון לא נפגעים כלל.
+## The fix
 
-## התקנה
+This is a local copy (`custom_components`) of the official integration, identical to the original source (Home Assistant 2026.9.4) — **except for one targeted change**: `__init__.py` contains a monkey-patch that makes `deviceToken` an optional field instead of crashing on it. If a device is missing the token, it's registered with a log warning and keeps working (status reads and, in most cases, sending commands continue to work); all other devices on the account are unaffected.
 
-### אפשרות א': דרך HACS (מומלץ)
-1. ב-HACS → שלוש נקודות למעלה → **Custom repositories**
-2. הדבק את כתובת הריפו הזה, קטגוריה **Integration**
-3. חפש "Electra Smart (deviceToken fix)" והתקן
-4. **הפעל מחדש את Home Assistant** (custom_components לא נטענים ב-hot reload)
+## Installation
 
-### אפשרות ב': ידני
-1. העתק את התיקייה `custom_components/electrasmart` מהריפו הזה אל `/config/custom_components/electrasmart` בשרת ה-HA שלך
-2. הפעל מחדש את Home Assistant
+### Option A: via HACS (recommended)
+1. In HACS → three dots at the top → **Custom repositories**
+2. Paste this repo's URL, category **Integration**
+3. Search for "Electra Smart (deviceToken fix)" and install
+4. **Restart Home Assistant** (custom_components are not picked up by a hot reload)
 
-### אם האינטגרציה כבר מוגדרת אצלך
-אין צורך להגדיר מחדש — פשוט שים את הקבצים במקום והפעל מחדש. ה-config entry הקיים ימשיך לעבוד כרגיל.
+### Option B: manual
+1. Copy the `custom_components/electrasmart` folder from this repo to `/config/custom_components/electrasmart` on your HA server
+2. Restart Home Assistant
 
-## חשוב לדעת
+### If the integration is already configured
+No need to re-add it — just drop the files in place and restart. Your existing config entry will keep working as-is.
 
-- זה **תיקון זמני בצד הלקוח**, לא תיקון רשמי. ברגע ש-Home Assistant/Electra יתקנו את הבעיה בגרסת הליבה הרשמית, **ה-custom_components הזה ימשיך "לנצח" ולהסתיר את התיקון הרשמי** עד שתסיר אותו ידנית:
+## Good to know
+
+- This is a **temporary client-side workaround**, not an official fix. Once Home Assistant/Electra fix the issue in the official core release, **this custom_components will keep "winning" and shadowing the official fix** until you remove it manually:
   ```
   rm -rf /config/custom_components/electrasmart
   ```
-  ואז restart נוסף.
-- מומלץ לעקוב אחרי ה-issues למעלה ולהסיר את התיקון הזה כשהם ייסגרו.
+  followed by another restart.
+- It's recommended to follow the issues linked above and remove this fix once they're closed.
 
-## קרדיט ורישוי
+## Credit and licensing
 
-- **הקוד המקורי** (כל הקבצים חוץ מהשינוי הממוקד ב-`__init__.py`): Home Assistant Core, [home-assistant/core](https://github.com/home-assistant/core), codeowner של האינטגרציה: [@jafar-atili](https://github.com/jafar-atili). רישיון: Apache License 2.0.
-- **השינוי בקובץ `__init__.py`**: Itay Abramzon, 2026, תחת אותו רישיון (Apache 2.0) — ראו [NOTICE](NOTICE) לפירוט המדויק של מה השתנה.
-- זהו עדיין **fork לא רשמי**, לא קשור ולא מאושר על ידי Home Assistant או Electra.
+- **Original code** (all files except the targeted change in `__init__.py`): Home Assistant Core, [home-assistant/core](https://github.com/home-assistant/core), integration codeowner: [@jafar-atili](https://github.com/jafar-atili). License: Apache License 2.0.
+- **The change in `__init__.py`**: Itay Abramzon, 2026, under the same license (Apache 2.0) — see [NOTICE](NOTICE) for the exact details of what changed.
+- This remains an **unofficial fork**, not affiliated with or endorsed by Home Assistant or Electra.
