@@ -18,7 +18,7 @@ Also reported in the Israeli community ([Facebook post](https://www.facebook.com
 - https://github.com/home-assistant/core/issues/183846
 - https://github.com/home-assistant/core/issues/183829
 
-**Status (as of 2026-10-05):** An official fix is in progress but **not yet merged** — [home-assistant/core PR #184187](https://github.com/home-assistant/core/pull/184187) switches the integration to a maintained fork of the client library. Until that PR is merged and released, the custom integration below is the only working fix.
+**Status (as of 2026-10-08):** The official fix was **merged on 2026-10-06** — [home-assistant/core PR #184187](https://github.com/home-assistant/core/pull/184187) switches the integration to a maintained fork of the client library (`pyelectrasmart`). It is not yet in a released Home Assistant version. Until a release containing it reaches you, the custom integration below remains a working fix. Once you're on a release that includes the PR, remove this custom integration (see "Good to know" below).
 
 ## The fix
 
